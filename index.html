@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BizCraft — Offline AI Business Studio</title>
+<link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2306b6d4'/><text x='50' y='58' font-size='48' text-anchor='middle' font-family='Segoe UI, Roboto' fill='white'>BC</text></svg>">
+<style>
+  :root{
+    --bg:#071025; --card:#0b1220; --muted:#9fb0c6; --accent:#06b6d4;
+    --accent-2:#7c3aed; --glass: rgba(255,255,255,0.03); --radius:14px;
+    --pad:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;color:#e6eef6;background:
+    radial-gradient(1200px 600px at 10% 10%, rgba(7,24,47,0.6), transparent 10%),
+    linear-gradient(180deg,#041025 0%, #071a2a 100%);-webkit-font-smoothing:antialiased}
+  .container{max-width:1200px;margin:26px auto;display:grid;grid-template-columns:320px 1fr;gap:20px;padding:12px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:var(--pad);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+  /* Sidebar */
+  .sidebar{min-height:720px;overflow:auto}
+  .brand{display:flex;gap:12px;align-items:center;margin-bottom:6px}
+  .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#02121a}
+  h1{margin:0;font-size:1.06rem}
+  .muted{color:var(--muted);font-size:0.86rem}
+  label{display:block;margin-top:10px;font-size:0.86rem;color:var(--muted)}
+  input,textarea,select{width:100%;padding:10px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit;font-size:0.95rem}
+  textarea{min-height:90px;resize:vertical}
+  .btn{display:inline-block;padding:10px 12px;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#02121a;border:none;cursor:pointer;font-weight:700}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+  .small{font-size:0.86rem;padding:8px 10px}
+  .section-title{font-weight:700;color:var(--accent);margin-bottom:8px}
+  .list{margin-top:10px}
+  .list-item{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:10px;background:rgba(255,255,255,0.02);margin-bottom:8px;align-items:center}
+  .pill{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:999px;font-size:0.86rem}
+  /* Main */
+  .main{min-height:720px;display:flex;flex-direction:column}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{padding:8px 12px;border-radius:10px;background:var(--glass);cursor:pointer;color:var(--muted);font-weight:600}
+  .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#02121a}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .card-small{background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));border-radius:12px;padding:12px}
+  .h1{font-size:1.04rem;font-weight:800}
+  .h2{font-size:0.9rem;color:var(--muted)}
+  .two-col{display:flex;gap:12px}
+  .flex{display:flex;gap:12px}
+  .right-panel{width:420px}
+  .hidden{display:none}
+  footer{margin-top:12px;color:var(--muted);font-size:0.86rem}
+  @media(max-width:1000px){.container{grid-template-columns:1fr;padding:12px}.grid{grid-template-columns:repeat(2,1fr)}.right-panel{width:100%}}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  /* small helpers */
+  .muted-2{color:var(--muted);font-size:0.9rem}
+  .center{display:flex;align-items:center;justify-content:center}
+  .accent-text{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- LEFT: Sidebar -->
+  <aside class="sidebar card">
+    <div class="brand">
+      <div class="logo">BC</div>
+      <div>
+        <h1>BizCraft</h1>
+        <div class="muted">Offline AI-style Business Studio</div>
+      </div>
+    </div>
+
+    <!-- AUTH / PROFILE -->
+    <div id="authPane">
+      <div class="section-title">Welcome — Create Profile</div>
+      <label>Company name</label>
+      <input id="inCompany" placeholder="Stellar Creations Pvt Ltd" />
+      <label>Email</label>
+      <input id="inEmail" placeholder="founder@company.com" />
+      <label>Phone</label>
+      <input id="inPhone" placeholder="+91 98765 43210" />
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn" id="btnCreate">Create Profile</button>
+        <button class="btn ghost" id="btnLoad">Load Profiles</button>
+      </div>
+    </div>
+
+    <hr style="opacity:0.06;margin:14px 0" />
+
+    <div id="profilePane" class="hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800" id="profileName">—</div>
+          <div class="muted-2" id="profileMeta">—</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <button class="btn small" id="btnSwitch">Switch</button>
+          <button class="btn ghost small" id="btnSignOut">Sign out</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="muted">Quick actions</div>
+        <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="btn small" id="quickPlan">New Plan</button>
+          <button class="btn ghost small" id="quickSWOT">SWOT</button>
+          <button class="btn small" id="quickInv">Inventory</button>
+          <button class="btn ghost small" id="quickMeet">Meeting</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="muted">Saved companies</div>
+        <div id="companiesList" class="list"></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <button class="btn ghost small" id="btnResetAll">Reset All Local Data</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT: Main -->
+  <main class="main">
+    <div class="top card">
+      <div>
+        <div class="h1" id="dashTitle">Welcome to BizCraft</div>
+        <div class="muted-2" id="dashSub">Create a company profile to begin.</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="muted-2">Offline</div>
+        <button class="btn ghost" id="btnExportAll">Export Company Data</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tabs" id="tabsBar">
+        <div class="tab active" data-tab="dashboardTab">Dashboard</div>
+        <div class="tab" data-tab="planTab">Business Plan</div>
+        <div class="tab" data-tab="swotTab">SWOT</div>
+        <div class="tab" data-tab="inventoryTab">Inventory</div>
+        <div class="tab" data-tab="meetTab">Meetings</div>
+        <div class="tab" data-tab="posterTab">Poster</div>
+        <div class="tab" data-tab="remTab">Reminders</div>
+      </div>
+
+      <div id="viewArea" style="margin-top:12px">
+        <!-- DASHBOARD -->
+        <div id="dashboardTab" class="tabView">
+          <div class="grid">
+            <div class="card-small center">
+              <div>
+                <div class="h1" id="statPlans">0</div>
+                <div class="h2">Plans</div>
+              </div>
+            </div>
+            <div class="card-small center">
+              <div>
+                <div class="h1" id="statItems">0</div>
+                <div class="h2">Inventory items</div>
+              </div>
+            </div>
+            <div class="card-small center">
+              <div>
+                <div class="h1" id="statMeetings">0</div>
+                <div class="h2">Upcoming meetings</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="two-col">
+            <div style="flex:1" class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div class="section-title">Recent Plan</div>
+                  <div id="recentPlanTitle" style="font-weight:800">—</div>
+                  <div class="muted-2" id="recentPlanSnippet">No plans yet</div>
+                </div>
+                <div style="text-align:right">
+                  <button class="btn" id="openPlanBtn">Open</button>
+                </div>
+              </div>
+              <div style="margin-top:12px">
+                <div class="section-title">Quick AI Insight</div>
+                <div id="aiInsight" class="muted-2">Create a plan or ask AI for a one-line growth hack.</div>
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <input id="quickPrompt" placeholder="e.g. increase revenue 2x with partnerships" />
+                  <button class="btn" id="runQuickAI">Run</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card right-panel">
+              <div class="section-title">Upcoming</div>
+              <div id="dashUpcoming" class="muted-2">No upcoming meetings or reminders.</div>
+              <div style="margin-top:12px">
+                <div class="section-title">Company Profile</div>
+                <div class="muted-2" id="cardProfile">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLAN TAB -->
+        <div id="planTab" class="tabView hidden">
+          <div class="two-col" style="margin-bottom:12px">
+            <div style="flex:1" class="card">
+              <div class="section-title">Create / Generate Business Plan</div>
+              <label>Plan title</label>
+              <input id="planTitle" placeholder="Q4 Growth Plan" />
+              <label>Target audience</label>
+              <input id="planAudience" placeholder="SMBs, D2C customers..." />
+              <label>Objectives (comma separated)</label>
+              <input id="planObjectives" placeholder="Revenue, retention, PR" />
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn" id="btnGenPlan">Generate (AI)</button>
+                <button class="btn ghost" id="btnSavePlan">Save</button>
+                <button class="btn ghost" id="btnExportPlan">Export</button>
+              </div>
+
+              <div style="margin-top:12px" id="planSections"></div>
+            </div>
+
+            <div class="card right-panel">
+              <div class="section-title">Live Preview</div>
+              <div id="planPreview" class="muted-2">Plan preview appears here.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Saved Plans</div>
+            <div id="plansList" class="list"></div>
+          </div>
+        </div>
+
+        <!-- SWOT -->
+        <div id="swotTab" class="tabView hidden">
+          <div class="two-col">
+            <div style="flex:1" class="card">
+              <div class="section-title">SWOT Inputs</div>
+              <label>Strengths (comma separated)</label>
+              <input id="swotS" />
+              <label>Weaknesses</label>
+              <input id="swotW" />
+              <label>Opportunities</label>
+              <input id="swotO" />
+              <label>Threats</label>
+              <input id="swotT" />
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn" id="btnGenSWOT">Generate + Save</button>
+                <button class="btn ghost" id="btnLoadSWOT">Load Last</button>
+              </div>
+            </div>
+            <div class="card right-panel">
+              <div class="section-title">SWOT Visual</div>
+              <canvas id="swotCanvas" width="360" height="320" style="border-radius:8px;background:#071425;display:block"></canvas>
+              <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn" id="downloadSWOT">Download PNG</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <div id="inventoryTab" class="tabView hidden">
+          <div class="two-col">
+            <div style="flex:1" class="card">
+              <div class="section-title">Add / Update Item</div>
+              <label>Item name</label>
+              <input id="itemName" placeholder="Chai packets" />
+              <label>Quantity</label>
+              <input id="itemQty" placeholder="10" />
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn" id="btnAddItem">Add / Update</button>
+                <button class="btn ghost" id="btnClearInv">Clear Inventory</button>
+              </div>
+
+              <div style="margin-top:12px" class="section-title">Inventory List</div>
+              <div id="invList" class="list"></div>
+            </div>
+
+            <div class="card right-panel">
+              <div class="section-title">Summary</div>
+              <div id="invSummary" class="muted-2">No items yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEETINGS -->
+        <div id="meetTab" class="tabView hidden">
+          <div class="two-col">
+            <div style="flex:1" class="card">
+              <div class="section-title">Schedule Meeting</div>
+              <label>Title</label>
+              <input id="meetTitle" />
+              <label>Date & Time</label>
+              <input id="meetWhen" type="datetime-local" />
+              <label>Notes</label>
+              <textarea id="meetNotes"></textarea>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn" id="btnAddMeet">Schedule</button>
+                <button class="btn ghost" id="btnClearMeet">Clear All</button>
+              </div>
+            </div>
+
+            <div class="card right-panel">
+              <div class="section-title">Upcoming Meetings</div>
+              <div id="meetList" class="list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POSTER -->
+        <div id="posterTab" class="tabView hidden">
+          <div class="two-col">
+            <div style="flex:1" class="card">
+              <div class="section-title">Poster Designer</div>
+              <label>Title</label>
+              <input id="posterTitle" placeholder="BIG SALE" />
+              <label>Subtitle</label>
+              <input id="posterSub" placeholder="50% OFF today" />
+              <label>Accent Text</label>
+              <input id="posterAccent" placeholder="Limited stock" />
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn" id="btnDrawPoster">Draw</button>
+                <button class="btn ghost" id="btnDownloadPoster">Download PNG</button>
+              </div>
+            </div>
+
+            <div class="card right-panel">
+              <canvas id="posterCanvas" width="360" height="480" style="border-radius:8px;background:#071425"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- REMINDERS -->
+        <div id="remTab" class="tabView hidden">
+          <div class="two-col">
+            <div style="flex:1" class="card">
+              <div class="section-title">Create Reminder</div>
+              <label>Reminder text</label>
+              <input id="remText" />
+              <label>When</label>
+              <input id="remWhen" type="datetime-local" />
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn" id="btnAddRem">Add Reminder</button>
+                <button class="btn ghost" id="btnClearRems">Clear Reminders</button>
+              </div>
+            </div>
+
+            <div class="card right-panel">
+              <div class="section-title">Next Reminder</div>
+              <div id="nextRem" class="muted-2">—</div>
+              <div style="margin-top:10px">
+                <div class="section-title">All Reminders</div>
+                <div id="remList" class="list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- viewArea -->
+
+      <footer>Made with ❤️ — BizCraft (offline). All data stored locally in your browser.</footer>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ========== Offline "myAI" faux engine ========== */
+const myAI = {
+  generatePlanSections({company, title, audience, objectives}) {
+    // produce modern clickbait headings and explanatory paragraphs
+    const o = objectives ? objectives.split(',').map(s=>s.trim()).filter(Boolean) : [];
+    const objLine = o.length ? `Top objectives: ${o.slice(0,4).join(' · ')}` : '';
+    const headlines = [
+      `How ${company} Will Dominate ${audience || 'the Market'} in 90 Days`,
+      `The Unstoppable Growth Loop for ${company}`,
+      `${company}'s Secret Sauce: Convert, Retain, Expand`,
+      `From Pilot to Cashflow: ${company}'s Roadmap`
+    ];
+    const pick = (arr)=>arr[Math.floor(Math.random()*arr.length)];
+    const sections = [
+      {title: 'Executive Summary', content: `${pick(headlines)} — ${objLine} — This section outlines a pragmatic, data-informed strategy to build momentum quickly while keeping unit economics healthy.`},
+      {title: 'Market Analysis', content: `Market picture: fragmentation + demand for reliability. Target micro-niches and scale horizontally. Quick wins: low-hanging verticals. Insight: customers value speed and trust.`},
+      {title: 'Value Proposition', content: `${company} offers a unique combo: product + white-glove onboarding + SLA that converts trials into long-term contracts. Position as premium but accessible.`},
+      {title: 'Go-to-Market', content: `Growth channels: partnership pilots, performance campaigns, and a referral engine. First 90 days: 3 pilot customers, one high-value partnership.`},
+      {title: 'Operations', content: `Lean ops: outsource non-core, automate repetitive tasks, track 6 KPIs (CAC, LTV, Churn, MRR/Revenue, GM, Conversion). Weekly dashboards and daily standups.`},
+      {title: 'Financials & KPIs', content: `Forecast: runway-based model with break-even milestone by month 9. Key metrics: CAC payback < 12 months, gross margin > 55%.`},
+      {title: 'Milestones', content: `30 / 60 / 90 day plan: pilot → refine product → run acquisition engine → scale operations.`}
+    ];
+    // sprinkle clickbait adjectives and short CTA-like lines
+    const spice = '🔹 Modern · Scalable · Data-driven';
+    return sections.map(s=>({title:s.title, content:s.content + ' ' + spice}));
+  },
+
+  generateShortInsight(prompt) {
+    const tips = [
+      "Launch a pilot with 3 high-intent customers and convert via case studies.",
+      "Bundle services for higher AOV and create a subscription entry-tier.",
+      "Use targeted partnerships to reduce CAC and accelerate trust.",
+      "Make onboarding white-glove for first 50 customers to create viral referrals."
+    ];
+    return `AI Insight for "${prompt}": ${tips[Math.floor(Math.random()*tips.length)]} — ⚡ Pro tip: measure one KPI weekly.`;
+  },
+
+  makeClickbaitHeadline(base) {
+    const starts = ["Explosive Growth:", "Unbelievable ROI:", "How to 10x:", "The Ultimate Playbook:"];
+    const enders = ["(Case study inside)", "(Read now)", "(Step-by-step)"];
+    return `${starts[Math.floor(Math.random()*starts.length)]} ${base} ${enders[Math.floor(Math.random()*enders.length)]}`;
+  }
+};
+
+/* ========== App state + storage helpers ========== */
+const STORAGE_KEY = 'bizcraft_offline_v1';
+
+let app = {
+  profiles: [], // {id, name, email, phone, created, data:{plans:[],inventory:{},meets:[],rems:[],swot:{}}}
+  activeId: null
+};
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try { app = JSON.parse(raw); } catch(e){ console.error('parse err',e); }
+  }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(app)); }
+
+// create helper to get active profile object
+function activeProfile() {
+  return app.profiles.find(p=>p.id === app.activeId) || null;
+}
+
+/* ========== UI references ========== */
+const $ = id => document.getElementById(id);
+
+/* ========== Initialization ========== */
+loadState();
+renderProfileList();
+updateUI();
+
+/// Request Notification permission
+if ('Notification' in window) {
+  if (Notification.permission === 'default') Notification.requestPermission().catch(()=>{});
+}
+
+/* ========== Event wiring ========== */
+// Profile creation
+$('btnCreate').addEventListener('click', ()=>{
+  const name = $('inCompany').value.trim();
+  const email = $('inEmail').value.trim();
+  const phone = $('inPhone').value.trim();
+  if(!name || !email || !phone) { alert('Provide company name, email and phone.'); return; }
+  const id = Date.now().toString();
+  const profile = { id, name, email, phone, created: Date.now(), data: { plans: [], inventory: {}, meets: [], rems: [], swot: null } };
+  app.profiles.push(profile);
+  app.activeId = id;
+  saveState();
+  $('inCompany').value=''; $('inEmail').value=''; $('inPhone').value='';
+  renderProfileList();
+  updateUI();
+  alert('Profile created and active — welcome to BizCraft!');
+});
+
+// Load profiles
+$('btnLoad').addEventListener('click', ()=>{ renderProfileList(true); });
+
+// Switch / sign-out
+$('btnSwitch').addEventListener('click', ()=>{ renderProfileList(true); });
+$('btnSignOut').addEventListener('click', ()=>{ app.activeId = null; saveState(); updateUI(); });
+
+// reset all data
+$('btnResetAll').addEventListener('click', ()=>{ if(confirm('Reset all BizCraft data in this browser?')){ localStorage.removeItem(STORAGE_KEY); app = {profiles:[], activeId:null}; updateUI(); renderProfileList(); } });
+
+// quick actions
+$('quickPlan').addEventListener('click', ()=> switchTab('planTab'));
+$('quickSWOT').addEventListener('click', ()=> switchTab('swotTab'));
+$('quickInv').addEventListener('click', ()=> switchTab('inventoryTab'));
+$('quickMeet').addEventListener('click', ()=> switchTab('meetTab'));
+
+/* ========== Tabs wiring ========== */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const tab = t.dataset.tab;
+    switchTab(tab);
+  });
+});
+function switchTab(tabId) {
+  document.querySelectorAll('.tabView').forEach(v=>v.classList.add('hidden'));
+  $(tabId).classList.remove('hidden');
+}
+
+/* ========== Dashboard quick AI insight ========== */
+$('runQuickAI').addEventListener('click', ()=>{
+  const prompt = $('quickPrompt').value.trim();
+  if(!prompt){ alert('Type a prompt first'); return; }
+  const insight = myAI.generateShortInsight(prompt);
+  $('aiInsight').innerText = insight;
+});
+
+/* ========== Plan generation, save, export ========== */
+$('btnGenPlan').addEventListener('click', ()=>{
+  const profile = activeProfile();
+  if(!profile){ alert('Create a profile first.'); return; }
+  const title = $('planTitle').value.trim() || `${profile.name} Strategic Plan`;
+  const audience = $('planAudience').value.trim();
+  const objectives = $('planObjectives').value.trim();
+  const sections = myAI.generatePlanSections({company:profile.name, title, audience, objectives});
+  // render sections in UI
+  renderPlanSections(sections);
+  // show preview
+  $('planPreview').innerHTML = sections.map(s=>`<h3 style="margin:8px 0 4px">${s.title}</h3><p style="color:${getComputedStyle(document.body).getPropertyValue('--muted') || '#9fb0c6'}">${s.content}</p>`).join('');
+  // keep unsaved plan temporarily on window
+  window._unsavedPlan = {title,audience,objectives,sections,created:Date.now()};
+});
+
+$('btnSavePlan').addEventListener('click', ()=>{
+  const profile = activeProfile();
+  if(!profile){ alert('Create a profile first.'); return; }
+  if(!window._unsavedPlan){ alert('Generate a plan first (Use Generate AI).'); return; }
+  profile.data.plans.push({...window._unsavedPlan, id: Date.now().toString()});
+  saveState();
+  updateUI();
+  alert('Plan saved to company workspace.');
+  window._unsavedPlan = null;
+});
+
+$('btnExportPlan').addEventListener('click', ()=>{
+  const profile = activeProfile();
+  if(!profile){ alert('Create a profile first.'); return; }
+  let plan = profile.data.plans[profile.data.plans.length-1];
+  if(!plan){ alert('No saved plans yet. Save one first.'); return; }
+  // export as HTML file for printing to PDF or text
+  const html = renderPlanHTML(profile, plan);
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${plan.title.replace(/\s+/g,'_')}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+/* Render helpers for plan sections */
+function renderPlanSections(sections){
+  const container = $('planSections');
+  container.innerHTML = '';
+  sections.forEach((s, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'card-small';
+    div.style.marginBottom = '8px';
+    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><strong>${s.title}</strong><div><button class="btn ghost small" data-idx="${idx}" onclick="copySection(${idx})">Copy</button></div></div><div style="color:var(--muted);margin-top:8px">${s.content}</div>`;
+    container.appendChild(div);
+  });
+}
+window.copySection = (i) => {
+  if(!window._unsavedPlan) return;
+  const txt = window._unsavedPlan.sections[i].content;
+  navigator.clipboard?.writeText(txt).then(()=>alert('Section copied to clipboard')).catch(()=>alert('Copy failed'));
+};
+
+function renderPlanHTML(profile, plan) {
+  const styles = `
+    body{font-family:Inter,Arial,sans-serif;color:#041025;padding:24px}
+    h1{color:#06b6d4}
+    h2{color:#7c3aed}
+    .muted{color:#4b5563}
+  `;
+  return `<!doctype html><html><head><meta charset="utf-8"/><title>${plan.title}</title><style>${styles}</style></head><body>
+    <h1>${plan.title}</h1>
+    <div class="muted">Company: ${profile.name} · ${profile.email} · ${profile.phone}</div>
+    <hr/>
+    ${plan.sections.map(s=>`<h2>${s.title}</h2><p class="muted">${s.content}</p>`).join('')}
+  </body></html>`;
+}
+
+/* ========== Plans list UI update function ========== */
+function renderPlansList() {
+  const profile = activeProfile();
+  const list = $('plansList');
+  list.innerHTML = '';
+  if(!profile || !profile.data.plans.length) { list.innerHTML = '<div class="muted-2">No plans</div>'; return; }
+  profile.data.plans.slice().reverse().forEach(p=>{
+    const el = document.createElement('div');
+    el.className = 'list-item';
+    el.innerHTML = `<div><strong>${p.title}</strong><div class="muted-2">${new Date(p.created).toLocaleString()}</div></div>
+      <div style="display:flex;gap:8px"><button class="btn small" onclick="openPlan('${p.id}')">Open</button><button class="btn ghost small" onclick="downloadPlan('${p.id}')">Download</button></div>`;
+    list.appendChild(el);
+  });
+}
+window.openPlan = (id) => {
+  const profile = activeProfile();
+  if(!profile) return;
+  const plan = profile.data.plans.find(x=>x.id === id);
+  if(!plan) return;
+  // render into plan preview
+  $('planPreview').innerHTML = plan.sections.map(s=>`<h3 style="margin:8px 0 4px">${s.title}</h3><p style="color:${getComputedStyle(document.body).getPropertyValue('--muted') || '#9fb0c6'}">${s.content}</p>`).join('');
+  alert('Plan preview updated on right panel.');
+};
+window.downloadPlan = (id) => {
+  const profile = activeProfile();
+  if(!profile) return;
+  const plan = profile.data.plans.find(x=>x.id === id);
+  if(!plan) return;
+  const blob = new Blob([renderPlanHTML(profile, plan)], {type: 'text/html'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${plan.title.replace(/\s+/g,'_')}.html`; a.click(); URL.revokeObjectURL(a.href);
+};
+
+/* ========== SWOT functions ========== */
+$('btnGenSWOT').addEventListener('click', ()=>{
+  const profile = activeProfile();
+  if(!profile) { alert('Create profile first'); return; }
+  const S = $('swotS').value.split(',').map(x=>x.trim()).filter(Boolean);
+  const W = $('swotW').value.split(',').map(x=>x.trim()).filter(Boolean);
+  const O = $('swotO').value.split(',').map(x=>x.trim()).filter(Boolean);
+  const T = $('swotT').value.split(',').map(x=>x.trim()).filter(Boolean);
+  profile.data.swot = {S,W,O,T, saved: Date.now()};
+  saveState();
+  drawSWOT(profile.data.swot);
+  alert('SWOT saved to profile.');
+});
+$('btnLoadSWOT').addEventListener('click', ()=>{
+  const p = activeProfile();
+  if(!p || !p.data.swot) { alert('No SWOT saved yet'); return; }
+  drawSWOT(p.data.swot);
+});
+function drawSWOT(sw) {
+  const c = $('swotCanvas'); const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle = '#061425'; ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle = '#e6eef6'; ctx.font = 'bold 16px Inter'; ctx.fillText(activeProfile().name || 'Company', 12, 22);
+  const w = c.width/2, h = c.height/2;
+  ctx.strokeStyle = '#123'; ctx.lineWidth = 1;
+  // boxes
+  ctx.strokeRect(6,36,w-12,h-50);
+  ctx.strokeRect(w+6,36,w-12,h-50);
+  ctx.strokeRect(6,36+h-20,w-12,h-50);
+  ctx.strokeRect(w+6,36+h-20,w-12,h-50);
+  const drawList = (arr,x,y,title) => {
+    ctx.fillStyle = '#7dd3fc'; ctx.font = '600 14px Inter'; ctx.fillText(title, x+8, y+18);
+    ctx.fillStyle = '#cfefff'; ctx.font = '12px Inter';
+    arr.slice(0,6).forEach((it, idx) => ctx.fillText('• ' + it, x+10, y+36 + idx*18));
+  };
+  drawList(sw.S || [], 10, 50, 'Strengths');
+  drawList(sw.W || [], w+10, 50, 'Weaknesses');
+  drawList(sw.O || [], 10, 50 + h - 20, 'Opportunities');
+  drawList(sw.T || [], w+10, 50 + h - 20, 'Threats');
+}
+$('downloadSWOT').addEventListener('click', ()=>{
+  const a = document.createElement('a'); a.href = $('swotCanvas').toDataURL('image/png'); a.download = 'swot.png'; a.click();
+});
+
+/* ========== Inventory ========== */
+$('btnAddItem').addEventListener('click', ()=>{
+  const profile = activeProfile(); if(!profile){ alert('Create profile'); return; }
+  const name = $('itemName').value.trim(); const qty = Number($('itemQty').value || 0);
+  if(!name || qty <= 0){ alert('Provide item name and positive qty'); return; }
+  profile.data.inventory[name] = (profile.data.inventory[name] || 0) + qty;
+  saveState(); $('itemName').value=''; $('itemQty').value=''; updateUI(); alert('Item added/updated');
+});
+$('btnClearInv').addEventListener('click', ()=>{ const p=activeProfile(); if(!p) return; if(confirm('Clear inventory for this company?')){ p.data.inventory = {}; saveState(); updateUI(); } });
+
+window.incInv = (k) => { const p = activeProfile(); if(!p) return; p.data.inventory[k] = (p.data.inventory[k] || 0) + 1; saveState(); updateUI(); };
+window.decInv = (k) => { const p = activeProfile(); if(!p) return; p.data.inventory[k] = Math.max(0, (p.data.inventory[k]||0) - 1); saveState(); updateUI(); };
+
+/* ========== Meetings ========== */
+$('btnAddMeet').addEventListener('click', ()=>{
+  const p = activeProfile(); if(!p) { alert('Create profile'); return; }
+  const title = $('meetTitle').value.trim(); const when = $('meetWhen').value; const notes = $('meetNotes').value.trim();
+  if(!title || !when){ alert('Provide title and datetime'); return; }
+  p.data.meets.push({id: Date.now().toString(), title, when, notes});
+  saveState(); $('meetTitle').value=''; $('meetWhen').value=''; $('meetNotes').value=''; updateUI(); alert('Meeting scheduled');
+});
+$('btnClearMeet').addEventListener('click', ()=>{ const p = activeProfile(); if(!p) return; if(confirm('Clear all meetings for this company?')){ p.data.meets = []; saveState(); updateUI(); } });
+window.delMeet = (id)=>{ const p=activeProfile(); if(!p) return; p.data.meets = p.data.meets.filter(m=>m.id !== id); saveState(); updateUI(); };
+
+/* ========== Poster (canvas) ========== */
+$('btnDrawPoster').addEventListener('click', drawPoster);
+$('btnDownloadPoster').addEventListener('click', ()=>{ const a = document.createElement('a'); a.href = $('posterCanvas').toDataURL('image/png'); a.download = 'poster.png'; a.click(); });
+
+function drawPoster(){
+  const c = $('posterCanvas'); const ctx = c.getContext('2d');
+  const title = $('posterTitle').value.trim() || 'BIG SALE';
+  const sub = $('posterSub').value.trim() || '50% OFF';
+  const accent = $('posterAccent').value.trim() || 'Limited time offer';
+  // gradient bg
+  const g = ctx.createLinearGradient(0,0,c.width,c.height); g.addColorStop(0,'#081024'); g.addColorStop(1,'#061425');
+  ctx.fillStyle = g; ctx.fillRect(0,0,c.width,c.height);
+  // accent shape
+  ctx.fillStyle = '#06b6d4'; ctx.fillRect(18,20,c.width-36,8);
+  // title
+  ctx.fillStyle = '#e6eef6'; ctx.font = 'bold 36px Inter'; wrapText(ctx, title, 28, 120, c.width-56, 42);
+  ctx.font = '20px Inter'; ctx.fillStyle = '#cfefff'; ctx.fillText(sub, 28, 170);
+  ctx.fillStyle = '#7c3aed'; ctx.fillRect(28,190,120,8);
+  ctx.font = '14px Inter'; ctx.fillStyle = '#9fb0c6'; ctx.fillText(accent, 28, 220);
+}
+function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+  const words = text.split(' '), lines = []; let line = '';
+  for(let n=0;n<words.length;n++){
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    const testWidth = metrics.width;
+    if(testWidth > maxWidth && n > 0){ lines.push(line.trim()); line = words[n] + ' '; }
+    else { line = testLine; }
+  }
+  lines.push(line.trim());
+  for(let i=0;i<lines.length;i++){
+    ctx.fillText(lines[i], x, y + (i * lineHeight));
+  }
+}
+
+/* ========== Reminders ========== */
+$('btnAddRem').addEventListener('click', ()=>{
+  const p = activeProfile(); if(!p) { alert('Create profile first'); return; }
+  const text = $('remText').value.trim(); const when = $('remWhen').value;
+  if(!text || !when) { alert('Provide text and datetime'); return; }
+  p.data.rems.push({id: Date.now().toString(), text, when, fired:false});
+  saveState(); $('remText').value=''; $('remWhen').value=''; updateUI(); alert('Reminder added');
+});
+$('btnClearRems').addEventListener('click', ()=>{ const p = activeProfile(); if(!p) return; if(confirm('Clear reminders for this company?')){ p.data.rems = []; saveState(); updateUI(); } });
+window.delRem = (id)=>{ const p = activeProfile(); if(!p) return; p.data.rems = p.data.rems.filter(r=>r.id !== id); saveState(); updateUI(); };
+
+/* ========== Export company data (download JSON) ========== */
+$('btnExportAll').addEventListener('click', ()=>{
+  const p = activeProfile();
+  if(!p){ alert('Create or open a profile first.'); return; }
+  const blob = new Blob([JSON.stringify(p, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${p.name.replace(/\s+/g,'_')}_bizcraft.json`; a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* ========== Companies list UI ========== */
+function renderProfileList(showChooser) {
+  const list = $('companiesList'); list.innerHTML = '';
+  if(app.profiles.length === 0) { list.innerHTML = '<div class="muted-2">No saved profiles yet.</div>'; return; }
+  app.profiles.slice().reverse().forEach(p=>{
+    const el = document.createElement('div'); el.className = 'list-item';
+    el.innerHTML = `<div><strong>${p.name}</strong><div class="muted-2">${p.email} · ${p.phone}</div></div>
+      <div style="display:flex;gap:8px"><button class="btn small" onclick="activateProfile('${p.id}')">Open</button><button class="btn ghost small" onclick="deleteProfile('${p.id}')">Delete</button></div>`;
+    list.appendChild(el);
+  });
+  if(showChooser) {
+    const pick = prompt('Type the company name to open (exact):');
+    if(pick) {
+      const found = app.profiles.find(p => p.name.toLowerCase() === pick.toLowerCase());
+      if(found) { activateProfile(found.id); } else { alert('No match found. Use the list to open.'); }
+    }
+  }
+}
+window.activateProfile = (id) => {
+  app.activeId = id;
+  saveState();
+  updateUI();
+};
+window.deleteProfile = (id) => {
+  if(confirm('Delete this profile permanently (local)?')) {
+    app.profiles = app.profiles.filter(p=>p.id !== id);
+    if(app.activeId === id) app.activeId = null;
+    saveState();
+    renderProfileList();
+    updateUI();
+  }
+};
+
+/* ========== Periodic reminder check (runs while page open) ========== */
+setInterval(()=>{
+  const p = activeProfile();
+  if(!p) return;
+  const now = Date.now();
+  p.data.rems.forEach(r => {
+    if(!r.fired && new Date(r.when).getTime() <= now){
+      r.fired = true; // mark fired
+      saveState();
+      try {
+        if (Notification.permission === 'granted') {
+          new Notification(`BizCraft Reminder — ${p.name}`, { body: r.text });
+        } else {
+          alert('Reminder: ' + r.text);
+        }
+      } catch(e) {
+        alert('Reminder: ' + r.text);
+      }
+      updateUI();
+    }
+  });
+}, 5000);
+
+/* ========== UI updater (refresh lists / stats) ========== */
+function updateUI() {
+  const p = activeProfile();
+  if(p) {
+    // show profile pane
+    $('authPane').classList.add('hidden');
+    $('profilePane').classList.remove('hidden');
+    $('profileName').innerText = p.name;
+    $('profileMeta').innerText = `${p.email} · ${p.phone}`;
+    $('dashTitle').innerText = p.name;
+    $('dashSub').innerText = `Workspace · ${p.email}`;
+    $('cardProfile').innerText = `${p.name} · ${p.email} · ${p.phone}`;
+    // stats
+    $('statPlans').innerText = (p.data.plans || []).length;
+    $('statItems').innerText = Object.keys(p.data.inventory || {}).length;
+    $('statMeetings').innerText = p.data.meets ? p.data.meets.filter(m=>new Date(m.when) > new Date()).length : 0;
+    // upcoming
+    const nextRems = (p.data.rems || []).filter(r=>!r.fired).sort((a,b)=>new Date(a.when)-new Date(b.when)).slice(0,3);
+    $('dashUpcoming').innerText = [
+      ...(p.data.meets || []).filter(m=>new Date(m.when) > new Date()).slice(0,3).map(m=>`${m.title} · ${new Date(m.when).toLocaleString()}`),
+      ...nextRems.map(r=>`${r.text} · ${new Date(r.when).toLocaleString()}`)
+    ].join('\n') || 'No upcoming items';
+    // recent plan
+    const lastPlan = (p.data.plans || []).slice(-1)[0];
+    $('recentPlanTitle').innerText = lastPlan ? lastPlan.title : '—';
+    $('recentPlanSnippet').innerText = lastPlan ? (lastPlan.sections[0].content.slice(0,220)+'...') : 'No plans yet';
+    // plans list
+    renderPlansList();
+    // inventory list
+    renderInvList();
+    // meetings list
+    renderMeetList();
+    // reminders list
+    renderRemList();
+    // swot load
+    if(p.data.swot) drawSWOT(p.data.swot);
+  } else {
+    // show auth pane
+    $('authPane').classList.remove('hidden');
+    $('profilePane').classList.add('hidden');
+    $('dashTitle').innerText = 'Welcome to BizCraft';
+    $('dashSub').innerText = 'Create a company profile to begin.';
+    // clear panels
+    $('statPlans').innerText = '0';
+    $('statItems').innerText = '0';
+    $('statMeetings').innerText = '0';
+    $('dashUpcoming').innerText = 'No upcoming items';
+    $('cardProfile').innerText = '—';
+    $('recentPlanTitle').innerText = '—';
+    $('recentPlanSnippet').innerText = 'No plans yet';
+    $('plansList').innerHTML = '';
+    $('invList').innerHTML = '';
+    $('meetList').innerHTML = '';
+    $('remList').innerHTML = '';
+    $('planPreview').innerHTML = 'Plan preview appears here.';
+    $('planSections').innerHTML = '';
+  }
+  renderProfileList();
+}
+
+/* ========== Render helpers for inventory, meetings, reminders ========== */
+function renderInvList(){
+  const p = activeProfile(); const list = $('invList'); list.innerHTML='';
+  if(!p) return;
+  const inv = p.data.inventory || {};
+  const keys = Object.keys(inv);
+  if(keys.length === 0){ list.innerHTML = '<div class="muted-2">No inventory items</div>'; $('invSummary').innerText = 'No items yet.'; return; }
+  keys.forEach(k=>{
+    const el = document.createElement('div'); el.className = 'list-item';
+    el.innerHTML = `<div>${k}<div class="muted-2" style="font-size:0.82rem">qty: ${inv[k]}</div></div>
+      <div style="display:flex;gap:8px;align-items:center"><div class="pill">${inv[k]}</div><button class="btn ghost small" onclick="decInv('${k}')">-</button><button class="btn ghost small" onclick="incInv('${k}')">+</button></div>`;
+    list.appendChild(el);
+  });
+  $('invSummary').innerText = Object.entries(inv).map(([k,v])=>`${k}: ${v}`).join('\n');
+}
+
+function renderMeetList(){
+  const p = activeProfile(); const list = $('meetList'); list.innerHTML='';
+  if(!p || !p.data.meets.length){ list.innerHTML = '<div class="muted-2">No meetings scheduled</div>'; return; }
+  p.data.meets.slice().sort((a,b)=>new Date(a.when)-new Date(b.when)).forEach(m=>{
+    const el = document.createElement('div'); el.className = 'list-item';
+    el.innerHTML = `<div><strong>${m.title}</strong><div class="muted-2">${new Date(m.when).toLocaleString()}</div></div>
+      <div style="display:flex;gap:8px"><button class="btn small" onclick="viewMeet('${m.id}')">View</button><button class="btn ghost small" onclick="delMeet('${m.id}')">Delete</button></div>`;
+    list.appendChild(el);
+  });
+}
+window.viewMeet = (id) => {
+  const p = activeProfile(); if(!p) return;
+  const m = p.data.meets.find(x=>x.id === id);
+  if(!m) return;
+  alert(`${m.title}\n${new Date(m.when).toLocaleString()}\n\nNotes:\n${m.notes || '(none)'}`);
+};
+
+function renderRemList(){
+  const p = activeProfile(); const list = $('remList'); list.innerHTML='';
+  if(!p || !p.data.rems.length) { list.innerHTML = '<div class="muted-2">No reminders</div>'; $('nextRem').innerText = '—'; return; }
+  p.data.rems.slice().sort((a,b)=>new Date(a.when)-new Date(b.when)).forEach(r=>{
+    const el = document.createElement('div'); el.className = 'list-item';
+    el.innerHTML = `<div>${r.text}<div class="muted-2">${new Date(r.when).toLocaleString()}</div></div>
+      <div style="display:flex;gap:8px"><button class="btn ghost small" onclick="delRem('${r.id}')">Delete</button></div>`;
+    list.appendChild(el);
+  });
+  const next = p.data.rems.filter(r=>!r.fired).sort((a,b)=>new Date(a.when)-new Date(b.when))[0];
+  $('nextRem').innerText = next ? `${next.text} · ${new Date(next.when).toLocaleString()}` : '—';
+}
+
+/* ========== Final: initial UI update ========== */
+updateUI();
+
+</script>
+</body>
+</html>
