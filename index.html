@@ -20,7 +20,12 @@
   /* Sidebar */
   .sidebar{min-height:720px;overflow:auto}
   .brand{display:flex;gap:12px;align-items:center;margin-bottom:6px}
-  .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#02121a}
+ .logo img {
+  height: 1em;   /* same height as the text */
+  width: auto;   /* keep aspect ratio */
+  vertical-align: middle; /* align nicely with text baseline */
+}
+
   h1{margin:0;font-size:1.06rem}
   .muted{color:var(--muted);font-size:0.86rem}
   label{display:block;margin-top:10px;font-size:0.86rem;color:var(--muted)}
@@ -61,7 +66,7 @@
   <!-- LEFT: Sidebar -->
   <aside class="sidebar card">
     <div class="brand">
-      <div><img src="logo.png" alt="Logo">
+      <div class="logo"><img src="logo.png" alt="Logo">
 </div>
       <div>
         <h1>BizCraft</h1>
@@ -897,6 +902,7 @@ updateUI();
 </script>
 </body>
 </html>
+
 
 
 
